@@ -24,7 +24,7 @@ export class ExtensionCounter implements ExtensionCounterInterface {
     extensionsCount: { [key: string]: number },
   ): Promise<void> {
     //Simulate a delay of 5 seconds
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 6000));
 
     const tree = await this.gitHubClient.getTree(commitSha);
     tree.tree.forEach((item: any) => {
