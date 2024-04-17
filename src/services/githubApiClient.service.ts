@@ -51,7 +51,7 @@ export class GitHubApiClient implements GitHubClientInterface {
   // To aviod rate limit
   async exponentialDelay(attempt: number): Promise<void> {
     const baseDelay = 1000;
-    const increment = 500;
+    const increment = 350;
     const delay = baseDelay + increment * attempt;
     console.log(`Delaying request for ${delay} ms`);
     return new Promise(resolve => setTimeout(resolve, delay));
