@@ -2,10 +2,109 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Github Extensions API</title>
+    <title>Mi Proyecto GitHub</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Api extensiones github</h1>
+    <div class="container">
+      <h1>Consulta de Extensiones GitHub</h1>
+      <input type="text" id="owner" placeholder="Owner" />
+      <input type="text" id="repo" placeholder="Repository" />
+      <input type="text" id="token" placeholder="Access Token" />
+      <button onclick="fetchExtensions()">Consultar</button>
+      <div id="result"></div>
+    </div>
   </body>
+  <script>
+    async function fetchExtensions() {
+      const owner = document.getElementById('owner').value;
+      const repo = document.getElementById('repo').value;
+      const token = document.getElementById('token').value;
+      const url = `http://localhost:3127/extensions/${owner}/${repo}?token=${token}`;
+
+      document.getElementById('result').innerHTML = '<p>Loading...</p>';
+      document.querySelector('button').innerHTML =
+        '<div class="spinner"></div>';
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        document.getElementById('result').innerHTML =
+          `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        // Restaurar el texto del botón
+        document.querySelector('button').innerHTML = 'Consultar';
+      } catch (error) {
+        document.getElementById('result').innerHTML =
+          `<p>Error: ${error.message}</p>`;
+      }
+    }
+  </script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type='text'] {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box; /* Asegura que padding no afecte el ancho final */
+      display: block;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #0056b3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #004494;
+    }
+
+    #result {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      min-height: 50px; /* Asegura que el área de resultados tenga un mínimo de altura */
+    }
+
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border-left-color: #09f;
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </html>

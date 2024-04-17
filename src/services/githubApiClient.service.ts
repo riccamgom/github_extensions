@@ -5,17 +5,15 @@ import { GitHubClientInterface } from '../interfaces/githubApiClient.interface';
 export class GitHubApiClient implements GitHubClientInterface {
   private baseURL: string =
     process.env.GITHUB_API_URL ?? 'https://api.github.com';
-  private token: string = process.env.GITHUB_TOKEN ?? '';
+
   constructor(
     private owner: string,
     private repo: string,
+    private token?: string,
   ) {
     if (!this.token) {
       throw new Error('GitHub token not found');
     }
-  }
-  exponentiaDelayl(attempt: number): Promise<void> {
-    throw new Error('Method not implemented.');
   }
 
   async getTree(sha: string = 'HEAD'): Promise<any> {
@@ -27,7 +25,6 @@ export class GitHubApiClient implements GitHubClientInterface {
           Authorization: `Bearer ${this.token}`,
         },
       });
-      console.log('Response tree:', response.data);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch tree from GitHub:', error);
@@ -53,8 +50,15 @@ export class GitHubApiClient implements GitHubClientInterface {
 
   // To aviod rate limit
   async exponentialDelay(attempt: number): Promise<void> {
-    const baseDelay = 5000;
-    const delay = baseDelay * Math.pow(2, attempt);
+    const baseDelay = 1000;
+    const increment = 500;
+    const delay = baseDelay + increment * attempt;
+    console.log(`Delaying request for ${delay} ms`);
+    return new Promise(resolve => setTimeout(resolve, delay));
+  }
+
+  async simulateDelay(): Promise<void> {
+    const delay = 5000;
     return new Promise(resolve => setTimeout(resolve, delay));
   }
 }

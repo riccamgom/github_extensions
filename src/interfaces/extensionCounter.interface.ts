@@ -4,5 +4,6 @@ export interface ExtensionCounterInterface {
   processTree(
     commitSha: string,
     extensionsCount: { [key: string]: number },
+    counter: number,
   ): Promise<void>;
 }

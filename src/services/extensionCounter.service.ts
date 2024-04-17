@@ -14,26 +14,42 @@ export class ExtensionCounter implements ExtensionCounterInterface {
     [key: string]: number;
   }): Promise<void> {
     const commitsSha = await this.gitHubClient.getCommitsSha();
-    await Promise.allSettled(
-      commitsSha.map((sha: string) => this.processTree(sha, extensionsCount)),
-    );
+
+    // To avoid rate limit can´t use promise.allSettled
+    let counter = 0;
+    for (const sha of commitsSha) {
+      await this.processTree(sha, extensionsCount, counter);
+      counter++;
+    }
   }
 
   async processTree(
     commitSha: string,
     extensionsCount: { [key: string]: number },
+    counter: number,
   ): Promise<void> {
-    //Simulate a delay of 5 seconds
-    await new Promise(resolve => setTimeout(resolve, 6000));
+    //Incremental delay to avoid rate limit
+    await this.gitHubClient.exponentialDelay(counter);
+
+    //Extensions that should be counted only once
+    const singleCountExtensions = ['dockerignore', 'gitignore', 'prettierrc'];
 
     const tree = await this.gitHubClient.getTree(commitSha);
+
     tree.tree.forEach((item: any) => {
-      if (item.type === 'blob') {
-        const extension = this.extractExtension(item.path);
-        if (extension) {
-          extensionsCount[extension] = (extensionsCount[extension] || 0) + 1;
-        }
+      if (item.type !== 'blob') return;
+
+      const extension = this.extractExtension(item.path);
+      if (!extension) return;
+
+      // Single count extensions
+      if (singleCountExtensions.includes(extension)) {
+        if (extensionsCount.hasOwnProperty(extension)) return;
+        extensionsCount[extension] = 1;
+        return;
       }
+
+      extensionsCount[extension] = (extensionsCount[extension] || 0) + 1;
     });
   }
 
