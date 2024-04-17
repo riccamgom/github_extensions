@@ -1,4 +1,3 @@
-// src/controllers/RepositoryController.ts
 import { Request, Response } from 'express';
 import { GitHubApiClient } from '../services/githubApiClient.service';
 import { ExtensionCounter } from '../services/extensionCounter.service';
@@ -10,6 +9,7 @@ export class ExtensionController {
     try {
       const gitHubClient = new GitHubApiClient(owner, repo);
       const extensionCounter = new ExtensionCounter(gitHubClient);
+
       const result = await extensionCounter.countExtensions();
       res.json(result);
     } catch (error) {
