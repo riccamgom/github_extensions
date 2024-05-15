@@ -4,6 +4,8 @@ import path from 'path';
 import cors from 'cors';
 //Controllers
 import { ExtensionController } from './controllers/getextensions.controller';
+//Logs
+import { logMiddlewareAsync } from './middleware/logging.middleware';
 
 //Consts
 const app = express();
@@ -14,6 +16,9 @@ const extensionsController = new ExtensionController();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+//Use middleware
+app.use(logMiddlewareAsync);
 
 app.get('/test', (_req: Request, res: Response) => {
   console.log('Testing---');

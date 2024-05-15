@@ -10,18 +10,22 @@ export class ExtensionCounter implements ExtensionCounterInterface {
     return extensionsCount;
   }
 
-  async processCommits(extensionsCount: {
-    [key: string]: number;
-  }): Promise<void> {
+  async processCommits(extensionsCount: { [key: string]: number }): Promise<void> {
     const commitsSha = await this.gitHubClient.getCommitsSha();
-
-    // To avoid rate limit can´t use promise.allSettled
-    let counter = 0;
-    for (const sha of commitsSha) {
-      await this.processTree(sha, extensionsCount, counter);
-      counter++;
-    }
+  
+    const promises = commitsSha.map((sha:string, index:number) =>
+      this.processTree(sha, extensionsCount, index)
+    );
+  
+    const results = await Promise.allSettled(promises);
+  
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.log(`Processing failed for commit at index ${index} with error: ${result.reason}`);
+      }
+    });
   }
+  
 
   async processTree(
     commitSha: string,
